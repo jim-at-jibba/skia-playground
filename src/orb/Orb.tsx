@@ -2,21 +2,29 @@ import {
   Canvas,
   Circle,
   Group,
+  RadialGradient,
   SweepGradient,
   vec,
 } from "@shopify/react-native-skia";
 import type { OrbProps } from "./types";
 
 export function Orb(props: OrbProps) {
-  const { size, colors, rotation } = props;
+  const {
+    size,
+    colors,
+    rotation,
+    highlightX,
+    highlightY,
+    highlightRadius,
+  } = props;
   const center = vec(size / 2, size / 2);
   const radius = size / 2;
-
-  // Repeat first color at end so the sweep wraps seamlessly.
   const wrappedColors = [...colors, colors[0]];
 
-  // SweepGradient starts at 3 o'clock; offset so rotation=0 anchors at top.
   const sweepTransform = [{ rotate: (rotation - 90) * (Math.PI / 180) }];
+
+  const highlightCenter = vec(highlightX * size, highlightY * size);
+  const highlightR = highlightRadius * size;
 
   return (
     <Canvas style={{ width: size, height: size }}>
@@ -25,6 +33,13 @@ export function Orb(props: OrbProps) {
           <SweepGradient c={center} colors={wrappedColors} />
         </Circle>
       </Group>
+      <Circle cx={highlightCenter.x} cy={highlightCenter.y} r={highlightR}>
+        <RadialGradient
+          c={highlightCenter}
+          r={highlightR}
+          colors={["rgba(255,255,255,0.6)", "rgba(255,255,255,0)"]}
+        />
+      </Circle>
     </Canvas>
   );
 }
