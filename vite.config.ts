@@ -1,20 +1,46 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { viteStaticCopy } from "vite-plugin-static-copy";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [
-    react(),
-    viteStaticCopy({
-      targets: [
-        {
-          src: "node_modules/canvaskit-wasm/bin/full/canvaskit.wasm",
-          dest: ".",
-        },
-      ],
-    }),
-  ],
+  plugins: [react()],
+  resolve: {
+    alias: [
+      { find: /^react-native$/, replacement: "react-native-web" },
+      {
+        find: "react-native/Libraries/Image/AssetRegistry",
+        replacement: path.resolve(__dirname, "src/shims/empty.ts"),
+      },
+      {
+        find: "react-native/Libraries/Utilities/codegenNativeComponent",
+        replacement: path.resolve(__dirname, "src/shims/empty.ts"),
+      },
+    ],
+    extensions: [
+      ".web.tsx",
+      ".web.ts",
+      ".web.jsx",
+      ".web.js",
+      ".tsx",
+      ".ts",
+      ".jsx",
+      ".js",
+      ".mjs",
+      ".json",
+    ],
+  },
   optimizeDeps: {
-    exclude: ["canvaskit-wasm"],
+    include: ["canvaskit-wasm", "@shopify/react-native-skia", "react-native-web"],
+    esbuildOptions: {
+      resolveExtensions: [".web.js", ".web.ts", ".web.tsx", ".mjs", ".js", ".jsx", ".ts", ".tsx", ".json"],
+    },
+  },
+  define: {
+    "process.env.NODE_ENV": JSON.stringify("development"),
+    __DEV__: JSON.stringify(true),
+    global: "globalThis",
   },
 });

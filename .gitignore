@@ -8,3 +8,5 @@ dist-ssr
 .idea
 .superpowers/
 logs/
+orb-first-render.png
+.playwright-mcp/
