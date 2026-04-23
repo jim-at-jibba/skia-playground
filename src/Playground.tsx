@@ -6,6 +6,7 @@ import { DEFAULT_ORB_PROPS } from "./orb/types";
 import { AudioSourcePicker } from "./audio/AudioSourcePicker";
 import { useAudioSignal, type AudioSource } from "./audio/useAudioSignal";
 import { useBreath } from "./audio/useBreath";
+import { useTts } from "./audio/useTts";
 
 export function Playground() {
   const [source, setSource] = useState<AudioSource>(null);
@@ -59,11 +60,19 @@ export function Playground() {
   const colors: OrbColors = [c0, c1, c2, c3];
 
   const { phase, elapsedMs } = useBreath(breathSpeed);
-  const { level } = useAudioSignal(source);
+  const { level: audioLevel } = useAudioSignal(source);
+  const { speak, stop: stopTts, level: ttsLevel, speaking } = useTts();
+
+  const level = Math.max(audioLevel, ttsLevel);
 
   return (
     <>
-      <AudioSourcePicker source={source} level={level} onChange={setSource} />
+      <AudioSourcePicker
+        source={source}
+        level={level}
+        tts={{ speak, stop: stopTts, speaking }}
+        onChange={setSource}
+      />
       <Orb
         size={size}
         colors={colors}

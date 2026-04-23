@@ -1,9 +1,16 @@
 import { useRef, useState } from "react";
 import type { AudioSource } from "./useAudioSignal";
 
+type TtsHandlers = {
+  speak: (text: string) => void;
+  stop: () => void;
+  speaking: boolean;
+};
+
 type Props = {
   source: AudioSource;
   level: number;
+  tts: TtsHandlers;
   onChange: (next: AudioSource) => void;
 };
 
@@ -47,10 +54,13 @@ const meterLabelStyle: React.CSSProperties = {
   opacity: 0.7,
 };
 
-export function AudioSourcePicker({ source, level, onChange }: Props) {
+export function AudioSourcePicker({ source, level, tts, onChange }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ttsText, setTtsText] = useState(
+    "Hello. I'm a synthetic voice talking to test the orb animation.",
+  );
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -146,6 +156,51 @@ export function AudioSourcePicker({ source, level, onChange }: Props) {
       <button type="button" style={buttonStyle} onClick={handleStop}>
         Stop
       </button>
+
+      <div
+        style={{
+          borderTop: "1px solid #444",
+          paddingTop: 6,
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+        }}
+      >
+        <div style={{ opacity: 0.7 }}>browser TTS</div>
+        <textarea
+          value={ttsText}
+          onChange={(e) => setTtsText(e.target.value)}
+          rows={3}
+          style={{
+            background: "#1a1a1a",
+            color: "white",
+            border: "1px solid #444",
+            borderRadius: 4,
+            padding: 4,
+            fontFamily: "inherit",
+            fontSize: 11,
+            resize: "vertical",
+          }}
+        />
+        <div style={{ display: "flex", gap: 4 }}>
+          <button
+            type="button"
+            style={{ ...buttonStyle, flex: 1 }}
+            onClick={() => tts.speak(ttsText)}
+            disabled={tts.speaking}
+          >
+            {tts.speaking ? "Speaking…" : "Speak"}
+          </button>
+          <button
+            type="button"
+            style={{ ...buttonStyle, flex: 1 }}
+            onClick={tts.stop}
+          >
+            Stop TTS
+          </button>
+        </div>
+      </div>
+
       {error ? <div style={{ color: "#ffb0b0" }}>{error}</div> : null}
     </div>
   );
