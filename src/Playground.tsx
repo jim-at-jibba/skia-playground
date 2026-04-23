@@ -63,7 +63,7 @@ export function Playground() {
 
   return (
     <>
-      <AudioSourcePicker source={source} onChange={setSource} />
+      <AudioSourcePicker source={source} level={level} onChange={setSource} />
       <Orb
         size={size}
         colors={colors}

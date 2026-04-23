@@ -3,6 +3,7 @@ import type { AudioSource } from "./useAudioSignal";
 
 type Props = {
   source: AudioSource;
+  level: number;
   onChange: (next: AudioSource) => void;
 };
 
@@ -20,6 +21,7 @@ const containerStyle: React.CSSProperties = {
   fontFamily: "system-ui, sans-serif",
   fontSize: 12,
   zIndex: 10,
+  minWidth: 160,
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -31,7 +33,21 @@ const buttonStyle: React.CSSProperties = {
   cursor: "pointer",
 };
 
-export function AudioSourcePicker({ source, onChange }: Props) {
+const meterTrackStyle: React.CSSProperties = {
+  height: 6,
+  background: "#222",
+  borderRadius: 3,
+  overflow: "hidden",
+};
+
+const meterLabelStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  fontSize: 10,
+  opacity: 0.7,
+};
+
+export function AudioSourcePicker({ source, level, onChange }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -80,9 +96,41 @@ export function AudioSourcePicker({ source, onChange }: Props) {
         ? "mic on"
         : `file: ${fileName ?? "audio"}`;
 
+  const active = source !== null;
+  const percent = Math.round(level * 100);
+  const meterFillColor = level > 0.05 ? "#6ef56e" : "#555";
+
   return (
     <div style={containerStyle}>
-      <div style={{ opacity: 0.7 }}>{sourceLabel}</div>
+      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: active ? "#6ef56e" : "#555",
+          }}
+        />
+        <span style={{ opacity: 0.9 }}>{sourceLabel}</span>
+      </div>
+
+      <div>
+        <div style={meterLabelStyle}>
+          <span>level</span>
+          <span>{percent}%</span>
+        </div>
+        <div style={meterTrackStyle}>
+          <div
+            style={{
+              height: "100%",
+              width: `${percent}%`,
+              background: meterFillColor,
+              transition: "width 60ms linear",
+            }}
+          />
+        </div>
+      </div>
+
       <label style={{ ...buttonStyle, textAlign: "center" }}>
         Choose file
         <input
@@ -98,9 +146,7 @@ export function AudioSourcePicker({ source, onChange }: Props) {
       <button type="button" style={buttonStyle} onClick={handleStop}>
         Stop
       </button>
-      {error ? (
-        <div style={{ color: "#ffb0b0" }}>{error}</div>
-      ) : null}
+      {error ? <div style={{ color: "#ffb0b0" }}>{error}</div> : null}
     </div>
   );
 }

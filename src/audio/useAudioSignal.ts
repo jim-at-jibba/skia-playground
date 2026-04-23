@@ -5,9 +5,9 @@ export type AudioSource =
   | { kind: "mic"; stream: MediaStream }
   | null;
 
-const EMA_ALPHA = 0.15;
+const EMA_ALPHA = 0.3;
 // Throttle setState to avoid re-rendering when level hasn't meaningfully changed.
-const LEVEL_EPSILON = 0.002;
+const LEVEL_EPSILON = 0.001;
 
 let sharedCtx: AudioContext | null = null;
 let sharedAnalyser: AnalyserNode | null = null;
