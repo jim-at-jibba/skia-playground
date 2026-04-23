@@ -2,6 +2,7 @@ import {
   Blur,
   Canvas,
   Circle,
+  DisplacementMap,
   Group,
   RadialGradient,
   SweepGradient,
@@ -34,6 +35,8 @@ export function Orb(props: OrbProps) {
     audioRotGain,
     highlightDriftAmount,
     highlightDriftSpeed,
+    highlightCloudWarp,
+    highlightCloudNoise,
     level = 0,
     breathPhase = 0,
     elapsedMs = 0,
@@ -79,13 +82,29 @@ export function Orb(props: OrbProps) {
             <SweepGradient c={center} colors={wrappedColors} />
           </Circle>
         </Group>
-        <Circle cx={highlightCx} cy={highlightCy} r={highlightR}>
-          <RadialGradient
-            c={highlightCenter}
-            r={highlightR}
-            colors={["rgba(255,255,255,0.6)", "rgba(255,255,255,0)"]}
-          />
-        </Circle>
+        <Group
+          layer={
+            <DisplacementMap
+              channelX="r"
+              channelY="g"
+              scale={highlightCloudWarp}
+            >
+              <Turbulence
+                freqX={highlightCloudNoise * 0.02}
+                freqY={highlightCloudNoise * 0.02}
+                octaves={3}
+              />
+            </DisplacementMap>
+          }
+        >
+          <Circle cx={highlightCx} cy={highlightCy} r={highlightR}>
+            <RadialGradient
+              c={highlightCenter}
+              r={highlightR}
+              colors={["rgba(255,255,255,0.75)", "rgba(255,255,255,0)"]}
+            />
+          </Circle>
+        </Group>
       </Group>
       <Circle
         cx={center.x}

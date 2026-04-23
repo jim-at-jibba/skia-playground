@@ -31,6 +31,8 @@ export function Playground() {
     audioRotGain,
     highlightDriftAmount,
     highlightDriftSpeed,
+    highlightCloudWarp,
+    highlightCloudNoise,
   } = useControls({
     size: { value: DEFAULT_ORB_PROPS.size, min: 100, max: 600, step: 10 },
     Colors: folder({
@@ -45,6 +47,8 @@ export function Playground() {
       highlightRadius: { value: DEFAULT_ORB_PROPS.highlightRadius, min: 0, max: 1, step: 0.01 },
       highlightDriftAmount: { value: DEFAULT_ORB_PROPS.highlightDriftAmount, min: 0, max: 0.3, step: 0.01 },
       highlightDriftSpeed: { value: DEFAULT_ORB_PROPS.highlightDriftSpeed, min: 0.02, max: 0.5, step: 0.01 },
+      highlightCloudWarp: { value: DEFAULT_ORB_PROPS.highlightCloudWarp, min: 0, max: 120, step: 1 },
+      highlightCloudNoise: { value: DEFAULT_ORB_PROPS.highlightCloudNoise, min: 0.1, max: 3, step: 0.05 },
     }),
     Surface: folder({
       blur: { value: DEFAULT_ORB_PROPS.blur, min: 0, max: 40, step: 0.5 },
@@ -94,6 +98,8 @@ export function Playground() {
         audioRotGain={audioRotGain}
         highlightDriftAmount={highlightDriftAmount}
         highlightDriftSpeed={highlightDriftSpeed}
+        highlightCloudWarp={highlightCloudWarp}
+        highlightCloudNoise={highlightCloudNoise}
         level={level}
         breathPhase={phase}
         elapsedMs={elapsedMs}
