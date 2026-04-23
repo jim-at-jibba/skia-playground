@@ -14,6 +14,8 @@ const DEG_TO_RAD = Math.PI / 180;
 const ROT_BREATH_DEG = 4;
 const AUDIO_ROT_DEG_PER_SEC = 60;
 const CANVAS_SCALE = 1.7;
+// Irrational-ish ratio so x/y drift never lines up perfectly → organic wander.
+const DRIFT_Y_RATIO = 0.83;
 
 export function Orb(props: OrbProps) {
   const {
@@ -30,6 +32,8 @@ export function Orb(props: OrbProps) {
     audioScaleGain,
     audioHighlightGain,
     audioRotGain,
+    highlightDriftAmount,
+    highlightDriftSpeed,
     level = 0,
     breathPhase = 0,
     elapsedMs = 0,
@@ -49,11 +53,16 @@ export function Orb(props: OrbProps) {
     Math.min(1, highlightRadius * (1 + audioHighlightGain * level)),
   ) * size * scaleMod;
 
-  const highlightCx = center.x + (highlightX - 0.5) * size * scaleMod;
-  const highlightCy = center.y + (highlightY - 0.5) * size * scaleMod;
-  const highlightCenter = vec(highlightCx, highlightCy);
-
   const seconds = elapsedMs / 1000;
+
+  const driftPhaseX = seconds * highlightDriftSpeed * Math.PI * 2;
+  const driftPhaseY = seconds * highlightDriftSpeed * DRIFT_Y_RATIO * Math.PI * 2;
+  const driftedX = highlightX + highlightDriftAmount * Math.sin(driftPhaseX);
+  const driftedY = highlightY + highlightDriftAmount * Math.cos(driftPhaseY);
+
+  const highlightCx = center.x + (driftedX - 0.5) * size * scaleMod;
+  const highlightCy = center.y + (driftedY - 0.5) * size * scaleMod;
+  const highlightCenter = vec(highlightCx, highlightCy);
   const rotationDeg =
     rotation +
     ROT_BREATH_DEG * Math.sin(breathPhase) +

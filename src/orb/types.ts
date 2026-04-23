@@ -16,6 +16,9 @@ export type OrbProps = {
   audioHighlightGain: number;
   audioRotGain: number;
 
+  highlightDriftAmount: number;
+  highlightDriftSpeed: number;
+
   level?: number;
   breathPhase?: number;
   elapsedMs?: number;
@@ -35,4 +38,6 @@ export const DEFAULT_ORB_PROPS: Omit<OrbProps, "level" | "breathPhase" | "elapse
   audioScaleGain: 0.15,
   audioHighlightGain: 0.4,
   audioRotGain: 0.6,
+  highlightDriftAmount: 0.12,
+  highlightDriftSpeed: 0.12,
 };
