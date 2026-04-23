@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { useValue, type SkiaMutableValue } from "@shopify/react-native-skia";
+import { useEffect, useRef, useState } from "react";
 
 export type AudioSource =
   | { kind: "file"; element: HTMLAudioElement }
@@ -7,6 +6,8 @@ export type AudioSource =
   | null;
 
 const EMA_ALPHA = 0.15;
+// Throttle setState to avoid re-rendering when level hasn't meaningfully changed.
+const LEVEL_EPSILON = 0.002;
 
 let sharedCtx: AudioContext | null = null;
 let sharedAnalyser: AnalyserNode | null = null;
@@ -30,13 +31,16 @@ function computeRms(buffer: Uint8Array): number {
   return Math.sqrt(sumSq / buffer.length);
 }
 
-export function useAudioSignal(source: AudioSource): {
-  level: SkiaMutableValue<number>;
-} {
-  const level = useValue(0);
+export function useAudioSignal(source: AudioSource): { level: number } {
+  const [level, setLevel] = useState(0);
+  const smoothedRef = useRef(0);
 
   useEffect(() => {
-    if (!source) return;
+    if (!source) {
+      smoothedRef.current = 0;
+      setLevel(0);
+      return;
+    }
 
     const { ctx, analyser } = getContext();
     if (ctx.state === "suspended") ctx.resume();
@@ -49,18 +53,22 @@ export function useAudioSignal(source: AudioSource): {
     } else {
       node = ctx.createMediaStreamSource(source.stream);
       node.connect(analyser);
-      // Mic: do NOT connect to destination (avoid feedback).
     }
 
     const buffer = new Uint8Array(analyser.fftSize);
     let raf = 0;
-    let smoothed = 0;
 
     const tick = () => {
       analyser.getByteTimeDomainData(buffer);
       const rms = computeRms(buffer);
-      smoothed = (1 - EMA_ALPHA) * smoothed + EMA_ALPHA * rms;
-      level.current = Math.min(1, Math.max(0, smoothed));
+      const next = Math.min(
+        1,
+        Math.max(0, (1 - EMA_ALPHA) * smoothedRef.current + EMA_ALPHA * rms),
+      );
+      if (Math.abs(next - smoothedRef.current) > LEVEL_EPSILON) {
+        smoothedRef.current = next;
+        setLevel(next);
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -79,9 +87,10 @@ export function useAudioSignal(source: AudioSource): {
           // ignore
         }
       }
-      level.current = 0;
+      smoothedRef.current = 0;
+      setLevel(0);
     };
-  }, [source, level]);
+  }, [source]);
 
   return { level };
 }

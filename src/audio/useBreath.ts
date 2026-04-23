@@ -1,27 +1,32 @@
-import { useEffect } from "react";
-import { useValue, type SkiaMutableValue } from "@shopify/react-native-skia";
+import { useEffect, useState } from "react";
 
 const TWO_PI = Math.PI * 2;
 
-export function useBreath(speedHz: number): { phase: SkiaMutableValue<number> } {
-  const phase = useValue(0);
+export function useBreath(speedHz: number): {
+  phase: number;
+  elapsedMs: number;
+} {
+  const [state, setState] = useState({ phase: 0, elapsedMs: 0 });
 
   useEffect(() => {
     let raf = 0;
-    let last = performance.now();
+    const start = performance.now();
+    let last = start;
 
     const tick = (now: number) => {
       const dt = (now - last) / 1000;
       last = now;
-      let next = phase.current + TWO_PI * speedHz * dt;
-      if (next > TWO_PI) next -= TWO_PI;
-      phase.current = next;
+      setState((prev) => {
+        let next = prev.phase + TWO_PI * speedHz * dt;
+        if (next > TWO_PI) next -= TWO_PI;
+        return { phase: next, elapsedMs: now - start };
+      });
       raf = requestAnimationFrame(tick);
     };
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [speedHz, phase]);
+  }, [speedHz]);
 
-  return { phase };
+  return state;
 }

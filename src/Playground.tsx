@@ -58,7 +58,7 @@ export function Playground() {
 
   const colors: OrbColors = [c0, c1, c2, c3];
 
-  const { phase } = useBreath(breathSpeed);
+  const { phase, elapsedMs } = useBreath(breathSpeed);
   const { level } = useAudioSignal(source);
 
   return (
@@ -80,6 +80,7 @@ export function Playground() {
         audioRotGain={audioRotGain}
         level={level}
         breathPhase={phase}
+        elapsedMs={elapsedMs}
       />
     </>
   );

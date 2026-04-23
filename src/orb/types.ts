@@ -1,5 +1,3 @@
-import type { SkiaReadonlyValue } from "@shopify/react-native-skia";
-
 export type OrbColors = [string, string, string, string];
 
 export type OrbProps = {
@@ -13,18 +11,17 @@ export type OrbProps = {
   grainScale: number;
   rotation: number;
 
-  // Audio-reactive tuning (numbers, not SkiaValues)
   breathAmount: number;
   audioScaleGain: number;
   audioHighlightGain: number;
   audioRotGain: number;
 
-  // Optional SkiaValue inputs. If omitted, Orb treats them as constant 0.
-  level?: SkiaReadonlyValue<number>;
-  breathPhase?: SkiaReadonlyValue<number>;
+  level?: number;
+  breathPhase?: number;
+  elapsedMs?: number;
 };
 
-export const DEFAULT_ORB_PROPS: Omit<OrbProps, "level" | "breathPhase"> = {
+export const DEFAULT_ORB_PROPS: Omit<OrbProps, "level" | "breathPhase" | "elapsedMs"> = {
   size: 400,
   colors: ["#f4a5c0", "#e89a6a", "#d46c8a", "#b799c7"],
   highlightX: 0.35,

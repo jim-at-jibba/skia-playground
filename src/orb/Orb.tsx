@@ -6,9 +6,6 @@ import {
   RadialGradient,
   SweepGradient,
   Turbulence,
-  useClockValue,
-  useComputedValue,
-  useValue,
   vec,
 } from "@shopify/react-native-skia";
 import type { OrbProps } from "./types";
@@ -16,8 +13,6 @@ import type { OrbProps } from "./types";
 const DEG_TO_RAD = Math.PI / 180;
 const ROT_BREATH_DEG = 4;
 const AUDIO_ROT_DEG_PER_SEC = 60;
-// Canvas is sized larger than the base orb so peak pulses don't clip at the
-// edge. Max theoretical scale at default ranges is ~1.6; 1.7 gives margin.
 const CANVAS_SCALE = 1.7;
 
 export function Orb(props: OrbProps) {
@@ -35,65 +30,35 @@ export function Orb(props: OrbProps) {
     audioScaleGain,
     audioHighlightGain,
     audioRotGain,
-    level: levelProp,
-    breathPhase: breathPhaseProp,
+    level = 0,
+    breathPhase = 0,
+    elapsedMs = 0,
   } = props;
-
-  const fallbackLevel = useValue(0);
-  const fallbackBreath = useValue(0);
-  const level = levelProp ?? fallbackLevel;
-  const breathPhase = breathPhaseProp ?? fallbackBreath;
-
-  const clock = useClockValue();
 
   const canvasSize = Math.ceil(size * CANVAS_SCALE);
   const center = vec(canvasSize / 2, canvasSize / 2);
   const wrappedColors = [...colors, colors[0]];
 
-  const scaleMod = useComputedValue(
-    () =>
-      1 +
-      breathAmount * Math.sin(breathPhase.current) +
-      audioScaleGain * level.current,
-    [breathPhase, level]
-  );
+  const scaleMod =
+    1 + breathAmount * Math.sin(breathPhase) + audioScaleGain * level;
 
-  const radius = useComputedValue(
-    () => (size / 2) * scaleMod.current,
-    [scaleMod]
-  );
+  const radius = (size / 2) * scaleMod;
 
-  const effectiveHighlightR = useComputedValue(() => {
-    const boosted = highlightRadius * (1 + audioHighlightGain * level.current);
-    return Math.max(0, Math.min(1, boosted)) * size * scaleMod.current;
-  }, [level, scaleMod]);
+  const highlightR = Math.max(
+    0,
+    Math.min(1, highlightRadius * (1 + audioHighlightGain * level)),
+  ) * size * scaleMod;
 
-  const highlightCx = useComputedValue(
-    () => center.x + (highlightX - 0.5) * size * scaleMod.current,
-    [scaleMod]
-  );
-  const highlightCy = useComputedValue(
-    () => center.y + (highlightY - 0.5) * size * scaleMod.current,
-    [scaleMod]
-  );
-  const highlightCenterVec = useComputedValue(
-    () => vec(highlightCx.current, highlightCy.current),
-    [highlightCx, highlightCy]
-  );
+  const highlightCx = center.x + (highlightX - 0.5) * size * scaleMod;
+  const highlightCy = center.y + (highlightY - 0.5) * size * scaleMod;
+  const highlightCenter = vec(highlightCx, highlightCy);
 
-  const rotationRad = useComputedValue(() => {
-    const seconds = clock.current / 1000;
-    const deg =
-      rotation +
-      ROT_BREATH_DEG * Math.sin(breathPhase.current) +
-      audioRotGain * AUDIO_ROT_DEG_PER_SEC * seconds * level.current;
-    return (deg - 90) * DEG_TO_RAD;
-  }, [clock, breathPhase, level]);
-
-  const sweepTransform = useComputedValue(
-    () => [{ rotate: rotationRad.current }],
-    [rotationRad]
-  );
+  const seconds = elapsedMs / 1000;
+  const rotationDeg =
+    rotation +
+    ROT_BREATH_DEG * Math.sin(breathPhase) +
+    audioRotGain * AUDIO_ROT_DEG_PER_SEC * seconds * level;
+  const sweepTransform = [{ rotate: (rotationDeg - 90) * DEG_TO_RAD }];
 
   const turbFreq = grainScale / size;
 
@@ -105,10 +70,10 @@ export function Orb(props: OrbProps) {
             <SweepGradient c={center} colors={wrappedColors} />
           </Circle>
         </Group>
-        <Circle cx={highlightCx} cy={highlightCy} r={effectiveHighlightR}>
+        <Circle cx={highlightCx} cy={highlightCy} r={highlightR}>
           <RadialGradient
-            c={highlightCenterVec}
-            r={effectiveHighlightR}
+            c={highlightCenter}
+            r={highlightR}
             colors={["rgba(255,255,255,0.6)", "rgba(255,255,255,0)"]}
           />
         </Circle>
