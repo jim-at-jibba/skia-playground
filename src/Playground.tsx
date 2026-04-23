@@ -1,9 +1,15 @@
+import { useState } from "react";
 import { useControls, folder } from "leva";
 import { Orb } from "./orb/Orb";
 import type { OrbColors } from "./orb/types";
 import { DEFAULT_ORB_PROPS } from "./orb/types";
+import { AudioSourcePicker } from "./audio/AudioSourcePicker";
+import { useAudioSignal, type AudioSource } from "./audio/useAudioSignal";
+import { useBreath } from "./audio/useBreath";
 
 export function Playground() {
+  const [source, setSource] = useState<AudioSource>(null);
+
   const {
     size,
     c0,
@@ -17,6 +23,11 @@ export function Playground() {
     grainIntensity,
     grainScale,
     rotation,
+    breathAmount,
+    breathSpeed,
+    audioScaleGain,
+    audioHighlightGain,
+    audioRotGain,
   } = useControls({
     size: { value: DEFAULT_ORB_PROPS.size, min: 100, max: 600, step: 10 },
     Colors: folder({
@@ -36,21 +47,40 @@ export function Playground() {
       grainScale: { value: DEFAULT_ORB_PROPS.grainScale, min: 0.5, max: 5, step: 0.1 },
       rotation: { value: DEFAULT_ORB_PROPS.rotation, min: 0, max: 360, step: 1 },
     }),
+    Audio: folder({
+      breathAmount: { value: DEFAULT_ORB_PROPS.breathAmount, min: 0, max: 0.1, step: 0.005 },
+      breathSpeed: { value: 0.3, min: 0.05, max: 2, step: 0.05 },
+      audioScaleGain: { value: DEFAULT_ORB_PROPS.audioScaleGain, min: 0, max: 0.5, step: 0.01 },
+      audioHighlightGain: { value: DEFAULT_ORB_PROPS.audioHighlightGain, min: 0, max: 1, step: 0.01 },
+      audioRotGain: { value: DEFAULT_ORB_PROPS.audioRotGain, min: 0, max: 2, step: 0.05 },
+    }),
   });
 
   const colors: OrbColors = [c0, c1, c2, c3];
 
+  const { phase } = useBreath(breathSpeed);
+  const { level } = useAudioSignal(source);
+
   return (
-    <Orb
-      size={size}
-      colors={colors}
-      highlightX={highlightX}
-      highlightY={highlightY}
-      highlightRadius={highlightRadius}
-      blur={blur}
-      grainIntensity={grainIntensity}
-      grainScale={grainScale}
-      rotation={rotation}
-    />
+    <>
+      <AudioSourcePicker source={source} onChange={setSource} />
+      <Orb
+        size={size}
+        colors={colors}
+        highlightX={highlightX}
+        highlightY={highlightY}
+        highlightRadius={highlightRadius}
+        blur={blur}
+        grainIntensity={grainIntensity}
+        grainScale={grainScale}
+        rotation={rotation}
+        breathAmount={breathAmount}
+        audioScaleGain={audioScaleGain}
+        audioHighlightGain={audioHighlightGain}
+        audioRotGain={audioRotGain}
+        level={level}
+        breathPhase={phase}
+      />
+    </>
   );
 }
