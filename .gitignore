@@ -8,9 +8,6 @@ dist-ssr
 .idea
 .superpowers/
 logs/
-orb-first-render.png
-audio-reactive-orb.png
 .playwright-mcp/
-tts-picker.png
-drift.png
-cloud*.png
+# playground-generated screenshots at repo root
+/*.png

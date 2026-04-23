@@ -104,6 +104,28 @@ export function Playground() {
         breathPhase={phase}
         elapsedMs={elapsedMs}
       />
+      <a
+        href="https://github.com/jim-at-jibba/skia-playground"
+        target="_blank"
+        rel="noreferrer"
+        style={{
+          position: "fixed",
+          bottom: 12,
+          left: "50%",
+          transform: "translateX(-50%)",
+          color: "rgba(0,0,0,0.55)",
+          fontSize: 12,
+          fontFamily: "system-ui, sans-serif",
+          textDecoration: "none",
+          padding: "4px 10px",
+          borderRadius: 6,
+          background: "rgba(255,255,255,0.6)",
+          border: "1px solid rgba(0,0,0,0.08)",
+          backdropFilter: "blur(4px)",
+        }}
+      >
+        github.com/jim-at-jibba/skia-playground
+      </a>
     </>
   );
 }
