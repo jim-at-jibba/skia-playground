@@ -1,6 +1,7 @@
+import type { FC, ReactNode, CSSProperties } from "react";
 import {
   Blur,
-  Canvas,
+  Canvas as SkiaCanvas,
   Circle,
   DisplacementMap,
   Group,
@@ -10,6 +11,13 @@ import {
   vec,
 } from "@shopify/react-native-skia";
 import type { OrbProps } from "./types";
+
+// RN Skia 1.12 ships an incomplete Canvas type (ViewProps resolves to {} because
+// @types/react-native isn't installed). Re-type locally to accept children/style.
+const Canvas = SkiaCanvas as unknown as FC<{
+  children?: ReactNode;
+  style?: CSSProperties;
+}>;
 
 const DEG_TO_RAD = Math.PI / 180;
 const ROT_BREATH_DEG = 4;
