@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useControls, folder } from "leva";
+import { Leva, useControls, folder } from "leva";
 import { Orb } from "./orb/Orb";
 import type { OrbColors } from "./orb/types";
 import { DEFAULT_ORB_PROPS } from "./orb/types";
@@ -71,6 +71,7 @@ export function Playground() {
 
   return (
     <>
+      <Leva theme={{ sizes: { rootWidth: "380px", controlWidth: "180px" } }} />
       <AudioSourcePicker
         source={source}
         level={level}
