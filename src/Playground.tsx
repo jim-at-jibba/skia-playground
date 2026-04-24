@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Leva, useControls, folder } from "leva";
+import { useRef, useState } from "react";
+import { Leva, button, useControls, folder } from "leva";
 import { Orb } from "./orb/Orb";
 import type { OrbColors } from "./orb/types";
 import { DEFAULT_ORB_PROPS } from "./orb/types";
@@ -10,6 +10,8 @@ import { useTts } from "./audio/useTts";
 
 export function Playground() {
   const [source, setSource] = useState<AudioSource>(null);
+  const [justCopied, setJustCopied] = useState(false);
+  const latestSettingsRef = useRef<Record<string, unknown>>({});
 
   const {
     size,
@@ -33,8 +35,21 @@ export function Playground() {
     highlightDriftSpeed,
     highlightCloudWarp,
     highlightCloudNoise,
+    highlightColor,
   } = useControls({
     size: { value: DEFAULT_ORB_PROPS.size, min: 100, max: 600, step: 10 },
+    "Copy settings": button(() => {
+      const json = JSON.stringify(latestSettingsRef.current, null, 2);
+      navigator.clipboard.writeText(json).then(
+        () => {
+          setJustCopied(true);
+          setTimeout(() => setJustCopied(false), 1200);
+        },
+        () => {
+          console.error("Clipboard write failed");
+        },
+      );
+    }),
     Colors: folder({
       c0: DEFAULT_ORB_PROPS.colors[0],
       c1: DEFAULT_ORB_PROPS.colors[1],
@@ -49,6 +64,7 @@ export function Playground() {
       highlightDriftSpeed: { value: DEFAULT_ORB_PROPS.highlightDriftSpeed, min: 0.02, max: 0.5, step: 0.01 },
       highlightCloudWarp: { value: DEFAULT_ORB_PROPS.highlightCloudWarp, min: 0, max: 120, step: 1 },
       highlightCloudNoise: { value: DEFAULT_ORB_PROPS.highlightCloudNoise, min: 0.1, max: 3, step: 0.05 },
+      highlightColor: DEFAULT_ORB_PROPS.highlightColor,
     }),
     Surface: folder({
       blur: { value: DEFAULT_ORB_PROPS.blur, min: 0, max: 40, step: 0.5 },
@@ -66,6 +82,28 @@ export function Playground() {
   });
 
   const colors: OrbColors = [c0, c1, c2, c3];
+
+  latestSettingsRef.current = {
+    size,
+    colors: [c0, c1, c2, c3],
+    highlightX,
+    highlightY,
+    highlightRadius,
+    highlightDriftAmount,
+    highlightDriftSpeed,
+    highlightCloudWarp,
+    highlightCloudNoise,
+    highlightColor,
+    blur,
+    grainIntensity,
+    grainScale,
+    rotation,
+    breathAmount,
+    breathSpeed,
+    audioScaleGain,
+    audioHighlightGain,
+    audioRotGain,
+  };
 
   const { phase, elapsedMs } = useBreath(breathSpeed);
   const { level: audioLevel } = useAudioSignal(source);
@@ -100,10 +138,30 @@ export function Playground() {
         highlightDriftSpeed={highlightDriftSpeed}
         highlightCloudWarp={highlightCloudWarp}
         highlightCloudNoise={highlightCloudNoise}
+        highlightColor={highlightColor}
         level={level}
         breathPhase={phase}
         elapsedMs={elapsedMs}
       />
+      {justCopied ? (
+        <div
+          style={{
+            position: "fixed",
+            top: 12,
+            left: "50%",
+            transform: "translateX(-50%)",
+            padding: "6px 12px",
+            borderRadius: 6,
+            background: "rgba(0,0,0,0.75)",
+            color: "#6ef56e",
+            fontSize: 12,
+            fontFamily: "system-ui, sans-serif",
+            zIndex: 20,
+          }}
+        >
+          Copied to clipboard ✓
+        </div>
+      ) : null}
       <a
         href="https://github.com/jim-at-jibba/skia-playground"
         target="_blank"

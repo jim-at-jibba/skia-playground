@@ -26,6 +26,23 @@ const CANVAS_SCALE = 1.7;
 // Irrational-ish ratio so x/y drift never lines up perfectly → organic wander.
 const DRIFT_Y_RATIO = 0.83;
 
+// Produce a fully-transparent variant of the given color for use as the outer
+// stop of the highlight's radial gradient. Accepts #rrggbb, #rrggbbaa, rgb()
+// and rgba(). Falls back to transparent if the format isn't recognised.
+function transparentize(color: string): string {
+  if (/^#[0-9a-fA-F]{8}$/.test(color)) return color.slice(0, 7) + "00";
+  if (/^#[0-9a-fA-F]{6}$/.test(color)) return color + "00";
+  if (/^#[0-9a-fA-F]{3}$/.test(color)) {
+    const [, r, g, b] = color;
+    return `#${r}${r}${g}${g}${b}${b}00`;
+  }
+  if (color.startsWith("rgba("))
+    return color.replace(/,\s*[\d.]+\)\s*$/, ", 0)");
+  if (color.startsWith("rgb("))
+    return color.replace(/^rgb\(/, "rgba(").replace(/\)\s*$/, ", 0)");
+  return "transparent";
+}
+
 export function Orb(props: OrbProps) {
   const {
     size,
@@ -45,6 +62,7 @@ export function Orb(props: OrbProps) {
     highlightDriftSpeed,
     highlightCloudWarp,
     highlightCloudNoise,
+    highlightColor,
     level = 0,
     breathPhase = 0,
     elapsedMs = 0,
@@ -109,7 +127,7 @@ export function Orb(props: OrbProps) {
             <RadialGradient
               c={highlightCenter}
               r={highlightR}
-              colors={["rgba(255,255,255,0.75)", "rgba(255,255,255,0)"]}
+              colors={[highlightColor, transparentize(highlightColor)]}
             />
           </Circle>
         </Group>
