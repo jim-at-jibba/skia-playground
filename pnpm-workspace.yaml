@@ -1,0 +1,2 @@
+patchedDependencies:
+  leva: patches/leva.patch
