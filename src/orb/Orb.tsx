@@ -6,6 +6,7 @@ import {
   DisplacementMap,
   Group,
   RadialGradient,
+  Skia,
   SweepGradient,
   Turbulence,
   vec,
@@ -98,6 +99,11 @@ export function Orb(props: OrbProps) {
   const highlightRgba = `rgba(${hr}, ${hg}, ${hb}, ${highlightColorAlpha})`;
   const highlightRgbaEnd = `rgba(${hr}, ${hg}, ${hb}, 0)`;
 
+  // Clip the displaced highlight to the sphere so turbulence-warped pixels
+  // don't bleed outside the orb.
+  const sphereClip = Skia.Path.Make();
+  sphereClip.addCircle(center.x, center.y, radius);
+
   return (
     <Canvas style={{ width: canvasSize, height: canvasSize }}>
       <Group layer={<Blur blur={blur} />}>
@@ -106,28 +112,30 @@ export function Orb(props: OrbProps) {
             <SweepGradient c={center} colors={wrappedColors} />
           </Circle>
         </Group>
-        <Group
-          layer={
-            <DisplacementMap
-              channelX="r"
-              channelY="g"
-              scale={highlightCloudWarp}
-            >
-              <Turbulence
-                freqX={highlightCloudNoise * 0.02}
-                freqY={highlightCloudNoise * 0.02}
-                octaves={3}
+        <Group clip={sphereClip}>
+          <Group
+            layer={
+              <DisplacementMap
+                channelX="r"
+                channelY="g"
+                scale={highlightCloudWarp}
+              >
+                <Turbulence
+                  freqX={highlightCloudNoise * 0.02}
+                  freqY={highlightCloudNoise * 0.02}
+                  octaves={3}
+                />
+              </DisplacementMap>
+            }
+          >
+            <Circle cx={highlightCx} cy={highlightCy} r={highlightR}>
+              <RadialGradient
+                c={highlightCenter}
+                r={highlightR}
+                colors={[highlightRgba, highlightRgbaEnd]}
               />
-            </DisplacementMap>
-          }
-        >
-          <Circle cx={highlightCx} cy={highlightCy} r={highlightR}>
-            <RadialGradient
-              c={highlightCenter}
-              r={highlightR}
-              colors={[highlightRgba, highlightRgbaEnd]}
-            />
-          </Circle>
+            </Circle>
+          </Group>
         </Group>
       </Group>
       <Circle
