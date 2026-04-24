@@ -54,6 +54,7 @@ export function Playground() {
         "highlightColorHex",
         "highlightColorHexSpeaking",
         "highlightColorAlpha",
+        "edgeFeather",
         "blur",
         "grainIntensity",
         "grainScale",
@@ -111,6 +112,7 @@ export function Playground() {
       highlightColorHex,
       highlightColorHexSpeaking,
       highlightColorAlpha,
+      edgeFeather,
     },
     setLeva,
   ] = useControls(() => ({
@@ -159,6 +161,12 @@ export function Playground() {
       grainIntensity: { value: DEFAULT_ORB_PROPS.grainIntensity, min: 0, max: 1, step: 0.01 },
       grainScale: { value: DEFAULT_ORB_PROPS.grainScale, min: 0.5, max: 5, step: 0.1 },
       rotation: { value: DEFAULT_ORB_PROPS.rotation, min: 0, max: 360, step: 1 },
+      edgeFeather: {
+        value: DEFAULT_ORB_PROPS.edgeFeather,
+        min: 0,
+        max: 0.4,
+        step: 0.01,
+      },
     }),
     Audio: folder({
       breathAmount: { value: DEFAULT_ORB_PROPS.breathAmount, min: 0, max: 0.1, step: 0.005 },
@@ -188,6 +196,7 @@ export function Playground() {
     highlightColorHex,
     highlightColorHexSpeaking,
     highlightColorAlpha,
+    edgeFeather,
     blur,
     grainIntensity,
     grainScale,
@@ -236,6 +245,7 @@ export function Playground() {
         highlightColorHex={highlightColorHex}
         highlightColorHexSpeaking={highlightColorHexSpeaking}
         highlightColorAlpha={highlightColorAlpha}
+        edgeFeather={edgeFeather}
         level={level}
         breathPhase={phase}
         elapsedMs={elapsedMs}

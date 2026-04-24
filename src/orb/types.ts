@@ -24,6 +24,7 @@ export type OrbProps = {
   highlightColorHex: string;
   highlightColorHexSpeaking: string;
   highlightColorAlpha: number;
+  edgeFeather: number;
 
   level?: number;
   breathPhase?: number;
@@ -52,4 +53,5 @@ export const DEFAULT_ORB_PROPS: Omit<OrbProps, "level" | "breathPhase" | "elapse
   highlightColorHex: "#ffffff",
   highlightColorHexSpeaking: "#cfe0ff",
   highlightColorAlpha: 0.75,
+  edgeFeather: 0.08,
 };

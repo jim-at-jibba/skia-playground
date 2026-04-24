@@ -4,6 +4,7 @@ import {
   Canvas as SkiaCanvas,
   Circle,
   DisplacementMap,
+  Fill,
   Group,
   RadialGradient,
   Skia,
@@ -77,6 +78,7 @@ export function Orb(props: OrbProps) {
     highlightColorHex,
     highlightColorHexSpeaking,
     highlightColorAlpha,
+    edgeFeather,
     level = 0,
     breathPhase = 0,
     elapsedMs = 0,
@@ -179,6 +181,22 @@ export function Orb(props: OrbProps) {
       >
         <Turbulence freqX={turbFreq} freqY={turbFreq} octaves={2} />
       </Circle>
+      {/* Soft-edge mask: multiplies destination alpha by a radial falloff
+          so the outer (edgeFeather) fraction of the sphere fades to zero,
+          killing the hard-rim halo. Anything outside the sphere radius is
+          cleared since RadialGradient clamps to its last (transparent) stop. */}
+      <Fill blendMode="dstIn">
+        <RadialGradient
+          c={center}
+          r={radius}
+          colors={[
+            "rgba(255,255,255,1)",
+            "rgba(255,255,255,1)",
+            "rgba(255,255,255,0)",
+          ]}
+          positions={[0, Math.max(0, 1 - edgeFeather), 1]}
+        />
+      </Fill>
     </Canvas>
   );
 }
