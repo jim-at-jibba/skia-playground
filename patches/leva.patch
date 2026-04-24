@@ -1,0 +1,107 @@
+diff --git a/dist/leva.cjs.dev.js b/dist/leva.cjs.dev.js
+index 8cd29d904a4e01c1d15339db6356317b0c68ffcc..f6c460b35c322e8e66a81dd65478a10494a79587 100644
+--- a/dist/leva.cjs.dev.js
++++ b/dist/leva.cjs.dev.js
+@@ -138,7 +138,9 @@ function usePopin(margin = 3) {
+   const show = React.useCallback(() => setShow(true), []);
+   const hide = React.useCallback(() => setShow(false), []);
+   React.useLayoutEffect(() => {
+-    if (shown) {
++    if (!shown) return;
++    const position = () => {
++      if (!popinRef.current || !wrapperRef.current) return;
+       const {
+         bottom,
+         top,
+@@ -147,12 +149,18 @@ function usePopin(margin = 3) {
+       const {
+         height
+       } = wrapperRef.current.getBoundingClientRect();
+-      const direction = bottom + height > window.innerHeight - 40 ? 'up' : 'down';
+-      wrapperRef.current.style.position = 'fixed';
+-      wrapperRef.current.style.zIndex = '10000';
+-      wrapperRef.current.style.left = left + 'px';
+-      if (direction === 'down') wrapperRef.current.style.top = bottom + margin + 'px';else wrapperRef.current.style.bottom = window.innerHeight - top + margin + 'px';
++      const direction = bottom + height > window.innerHeight - 40 ? "up" : "down";
++      wrapperRef.current.style.position = "fixed";
++      wrapperRef.current.style.zIndex = "10000";
++      wrapperRef.current.style.left = left + "px";
++      if (direction === "down") wrapperRef.current.style.top = bottom + margin + "px";else wrapperRef.current.style.bottom = window.innerHeight - top + margin + "px";
++    };
++    if (popinRef.current && wrapperRef.current) {
++      position();
++      return;
+     }
++    const id = requestAnimationFrame(position);
++    return () => cancelAnimationFrame(id);
+   }, [margin, shown]);
+   return {
+     popinRef,
+diff --git a/dist/leva.cjs.prod.js b/dist/leva.cjs.prod.js
+index 932f02f3c43fe9ae2cec815ef8d651b73e0706ec..8768a649ed135069fdfd2c67b1875e3197b4871c 100644
+--- a/dist/leva.cjs.prod.js
++++ b/dist/leva.cjs.prod.js
+@@ -138,7 +138,9 @@ function usePopin(margin = 3) {
+   const show = React.useCallback(() => setShow(true), []);
+   const hide = React.useCallback(() => setShow(false), []);
+   React.useLayoutEffect(() => {
+-    if (shown) {
++    if (!shown) return;
++    const position = () => {
++      if (!popinRef.current || !wrapperRef.current) return;
+       const {
+         bottom,
+         top,
+@@ -147,12 +149,18 @@ function usePopin(margin = 3) {
+       const {
+         height
+       } = wrapperRef.current.getBoundingClientRect();
+-      const direction = bottom + height > window.innerHeight - 40 ? 'up' : 'down';
+-      wrapperRef.current.style.position = 'fixed';
+-      wrapperRef.current.style.zIndex = '10000';
+-      wrapperRef.current.style.left = left + 'px';
+-      if (direction === 'down') wrapperRef.current.style.top = bottom + margin + 'px';else wrapperRef.current.style.bottom = window.innerHeight - top + margin + 'px';
++      const direction = bottom + height > window.innerHeight - 40 ? "up" : "down";
++      wrapperRef.current.style.position = "fixed";
++      wrapperRef.current.style.zIndex = "10000";
++      wrapperRef.current.style.left = left + "px";
++      if (direction === "down") wrapperRef.current.style.top = bottom + margin + "px";else wrapperRef.current.style.bottom = window.innerHeight - top + margin + "px";
++    };
++    if (popinRef.current && wrapperRef.current) {
++      position();
++      return;
+     }
++    const id = requestAnimationFrame(position);
++    return () => cancelAnimationFrame(id);
+   }, [margin, shown]);
+   return {
+     popinRef,
+diff --git a/dist/leva.esm.js b/dist/leva.esm.js
+index d3b68a488f98a26819fc4b92bf656b0373806535..3592ea1ed414ad2330f901c26c3714a6ae9ba31b 100644
+--- a/dist/leva.esm.js
++++ b/dist/leva.esm.js
+@@ -126,7 +126,9 @@ function usePopin(margin = 3) {
+   const show = useCallback(() => setShow(true), []);
+   const hide = useCallback(() => setShow(false), []);
+   useLayoutEffect(() => {
+-    if (shown) {
++    if (!shown) return;
++    const position = () => {
++      if (!popinRef.current || !wrapperRef.current) return;
+       const {
+         bottom,
+         top,
+@@ -140,7 +142,13 @@ function usePopin(margin = 3) {
+       wrapperRef.current.style.zIndex = '10000';
+       wrapperRef.current.style.left = left + 'px';
+       if (direction === 'down') wrapperRef.current.style.top = bottom + margin + 'px';else wrapperRef.current.style.bottom = window.innerHeight - top + margin + 'px';
++    };
++    if (popinRef.current && wrapperRef.current) {
++      position();
++      return;
+     }
++    const id = requestAnimationFrame(position);
++    return () => cancelAnimationFrame(id);
+   }, [margin, shown]);
+   return {
+     popinRef,

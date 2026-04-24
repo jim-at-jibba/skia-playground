@@ -35,7 +35,8 @@ export function Playground() {
     highlightDriftSpeed,
     highlightCloudWarp,
     highlightCloudNoise,
-    highlightColor,
+    highlightColorHex,
+    highlightColorAlpha,
   } = useControls({
     size: { value: DEFAULT_ORB_PROPS.size, min: 100, max: 600, step: 10 },
     "Copy settings": button(() => {
@@ -64,7 +65,13 @@ export function Playground() {
       highlightDriftSpeed: { value: DEFAULT_ORB_PROPS.highlightDriftSpeed, min: 0.02, max: 0.5, step: 0.01 },
       highlightCloudWarp: { value: DEFAULT_ORB_PROPS.highlightCloudWarp, min: 0, max: 120, step: 1 },
       highlightCloudNoise: { value: DEFAULT_ORB_PROPS.highlightCloudNoise, min: 0.1, max: 3, step: 0.05 },
-      highlightColor: DEFAULT_ORB_PROPS.highlightColor,
+      highlightColorHex: DEFAULT_ORB_PROPS.highlightColorHex,
+      highlightColorAlpha: {
+        value: DEFAULT_ORB_PROPS.highlightColorAlpha,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
     }),
     Surface: folder({
       blur: { value: DEFAULT_ORB_PROPS.blur, min: 0, max: 40, step: 0.5 },
@@ -93,7 +100,8 @@ export function Playground() {
     highlightDriftSpeed,
     highlightCloudWarp,
     highlightCloudNoise,
-    highlightColor,
+    highlightColorHex,
+    highlightColorAlpha,
     blur,
     grainIntensity,
     grainScale,
@@ -138,7 +146,8 @@ export function Playground() {
         highlightDriftSpeed={highlightDriftSpeed}
         highlightCloudWarp={highlightCloudWarp}
         highlightCloudNoise={highlightCloudNoise}
-        highlightColor={highlightColor}
+        highlightColorHex={highlightColorHex}
+        highlightColorAlpha={highlightColorAlpha}
         level={level}
         breathPhase={phase}
         elapsedMs={elapsedMs}

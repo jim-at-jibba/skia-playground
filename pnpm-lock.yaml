@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  leva:
+    hash: 8e1c8e512f2a213de63ea1a7f6713c2cecacde2687b1643e1d7721c3338fe479
+    path: patches/leva.patch
+
 importers:
 
   .:
@@ -16,7 +21,7 @@ importers:
         version: 0.40.0
       leva:
         specifier: ^0.9.35
-        version: 0.9.35(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.9.35(patch_hash=8e1c8e512f2a213de63ea1a7f6713c2cecacde2687b1643e1d7721c3338fe479)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -2892,7 +2897,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  leva@0.9.35(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  leva@0.9.35(patch_hash=8e1c8e512f2a213de63ea1a7f6713c2cecacde2687b1643e1d7721c3338fe479)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@radix-ui/react-portal': 1.1.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-tooltip': 1.2.8(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

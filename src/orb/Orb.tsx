@@ -26,21 +26,14 @@ const CANVAS_SCALE = 1.7;
 // Irrational-ish ratio so x/y drift never lines up perfectly → organic wander.
 const DRIFT_Y_RATIO = 0.83;
 
-// Produce a fully-transparent variant of the given color for use as the outer
-// stop of the highlight's radial gradient. Accepts #rrggbb, #rrggbbaa, rgb()
-// and rgba(). Falls back to transparent if the format isn't recognised.
-function transparentize(color: string): string {
-  if (/^#[0-9a-fA-F]{8}$/.test(color)) return color.slice(0, 7) + "00";
-  if (/^#[0-9a-fA-F]{6}$/.test(color)) return color + "00";
-  if (/^#[0-9a-fA-F]{3}$/.test(color)) {
-    const [, r, g, b] = color;
-    return `#${r}${r}${g}${g}${b}${b}00`;
-  }
-  if (color.startsWith("rgba("))
-    return color.replace(/,\s*[\d.]+\)\s*$/, ", 0)");
-  if (color.startsWith("rgb("))
-    return color.replace(/^rgb\(/, "rgba(").replace(/\)\s*$/, ", 0)");
-  return "transparent";
+// Parse a 3- or 6-digit hex color to its RGB components.
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  let h = hex.replace(/^#/, "");
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return { r, g, b };
 }
 
 export function Orb(props: OrbProps) {
@@ -62,7 +55,8 @@ export function Orb(props: OrbProps) {
     highlightDriftSpeed,
     highlightCloudWarp,
     highlightCloudNoise,
-    highlightColor,
+    highlightColorHex,
+    highlightColorAlpha,
     level = 0,
     breathPhase = 0,
     elapsedMs = 0,
@@ -100,6 +94,10 @@ export function Orb(props: OrbProps) {
 
   const turbFreq = grainScale / size;
 
+  const { r: hr, g: hg, b: hb } = hexToRgb(highlightColorHex);
+  const highlightRgba = `rgba(${hr}, ${hg}, ${hb}, ${highlightColorAlpha})`;
+  const highlightRgbaEnd = `rgba(${hr}, ${hg}, ${hb}, 0)`;
+
   return (
     <Canvas style={{ width: canvasSize, height: canvasSize }}>
       <Group layer={<Blur blur={blur} />}>
@@ -127,7 +125,7 @@ export function Orb(props: OrbProps) {
             <RadialGradient
               c={highlightCenter}
               r={highlightR}
-              colors={[highlightColor, transparentize(highlightColor)]}
+              colors={[highlightRgba, highlightRgbaEnd]}
             />
           </Circle>
         </Group>
