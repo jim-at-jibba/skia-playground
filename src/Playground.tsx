@@ -8,54 +8,135 @@ import { useAudioSignal, type AudioSource } from "./audio/useAudioSignal";
 import { useBreath } from "./audio/useBreath";
 import { useTts } from "./audio/useTts";
 
+type Toast = { text: string; color: string } | null;
+
 export function Playground() {
   const [source, setSource] = useState<AudioSource>(null);
-  const [justCopied, setJustCopied] = useState(false);
+  const [toast, setToast] = useState<Toast>(null);
   const latestSettingsRef = useRef<Record<string, unknown>>({});
+  const setLevaRef = useRef<((values: Record<string, unknown>) => void) | null>(
+    null,
+  );
 
-  const {
-    size,
-    c0,
-    c1,
-    c2,
-    c3,
-    highlightX,
-    highlightY,
-    highlightRadius,
-    blur,
-    grainIntensity,
-    grainScale,
-    rotation,
-    breathAmount,
-    breathSpeed,
-    audioScaleGain,
-    audioHighlightGain,
-    audioRotGain,
-    highlightDriftAmount,
-    highlightDriftSpeed,
-    highlightCloudWarp,
-    highlightCloudNoise,
-    highlightColorHex,
-    highlightColorAlpha,
-  } = useControls({
+  const flashToast = (text: string, color: string) => {
+    setToast({ text, color });
+    setTimeout(() => setToast(null), 1500);
+  };
+
+  const pasteSettings = async () => {
+    const setLeva = setLevaRef.current;
+    if (!setLeva) return;
+    try {
+      const text = await navigator.clipboard.readText();
+      const obj = JSON.parse(text);
+      const update: Record<string, unknown> = {};
+      if (Array.isArray(obj.colors) && obj.colors.length === 4) {
+        update.c0 = obj.colors[0];
+        update.c1 = obj.colors[1];
+        update.c2 = obj.colors[2];
+        update.c3 = obj.colors[3];
+      }
+      if (Array.isArray(obj.colorsSpeaking) && obj.colorsSpeaking.length === 4) {
+        update.c0s = obj.colorsSpeaking[0];
+        update.c1s = obj.colorsSpeaking[1];
+        update.c2s = obj.colorsSpeaking[2];
+        update.c3s = obj.colorsSpeaking[3];
+      }
+      const passthrough = [
+        "size",
+        "highlightX",
+        "highlightY",
+        "highlightRadius",
+        "highlightDriftAmount",
+        "highlightDriftSpeed",
+        "highlightCloudWarp",
+        "highlightCloudNoise",
+        "highlightColorHex",
+        "highlightColorHexSpeaking",
+        "highlightColorAlpha",
+        "blur",
+        "grainIntensity",
+        "grainScale",
+        "rotation",
+        "breathAmount",
+        "breathSpeed",
+        "audioScaleGain",
+        "audioHighlightGain",
+        "audioRotGain",
+      ];
+      for (const k of passthrough) {
+        if (k in obj) update[k] = obj[k];
+      }
+      if (Object.keys(update).length === 0) {
+        flashToast("No matching settings in clipboard", "#ffb0b0");
+        return;
+      }
+      setLeva(update);
+      flashToast("Settings applied ✓", "#6ef56e");
+    } catch (err) {
+      flashToast(
+        `Paste failed: ${err instanceof Error ? err.message : "unknown"}`,
+        "#ffb0b0",
+      );
+    }
+  };
+
+  const [
+    {
+      size,
+      c0,
+      c1,
+      c2,
+      c3,
+      c0s,
+      c1s,
+      c2s,
+      c3s,
+      highlightX,
+      highlightY,
+      highlightRadius,
+      blur,
+      grainIntensity,
+      grainScale,
+      rotation,
+      breathAmount,
+      breathSpeed,
+      audioScaleGain,
+      audioHighlightGain,
+      audioRotGain,
+      highlightDriftAmount,
+      highlightDriftSpeed,
+      highlightCloudWarp,
+      highlightCloudNoise,
+      highlightColorHex,
+      highlightColorHexSpeaking,
+      highlightColorAlpha,
+    },
+    setLeva,
+  ] = useControls(() => ({
     size: { value: DEFAULT_ORB_PROPS.size, min: 100, max: 600, step: 10 },
     "Copy settings": button(() => {
       const json = JSON.stringify(latestSettingsRef.current, null, 2);
       navigator.clipboard.writeText(json).then(
-        () => {
-          setJustCopied(true);
-          setTimeout(() => setJustCopied(false), 1200);
-        },
-        () => {
-          console.error("Clipboard write failed");
-        },
+        () => flashToast("Copied to clipboard ✓", "#6ef56e"),
+        () => flashToast("Clipboard write failed", "#ffb0b0"),
       );
+    }),
+    "Paste settings": button(() => {
+      void pasteSettings();
     }),
     Colors: folder({
       c0: DEFAULT_ORB_PROPS.colors[0],
       c1: DEFAULT_ORB_PROPS.colors[1],
       c2: DEFAULT_ORB_PROPS.colors[2],
       c3: DEFAULT_ORB_PROPS.colors[3],
+    }),
+    "Colors (speaking)": folder({
+      c0s: DEFAULT_ORB_PROPS.colorsSpeaking[0],
+      c1s: DEFAULT_ORB_PROPS.colorsSpeaking[1],
+      c2s: DEFAULT_ORB_PROPS.colorsSpeaking[2],
+      c3s: DEFAULT_ORB_PROPS.colorsSpeaking[3],
+      highlightColorHexSpeaking: DEFAULT_ORB_PROPS.highlightColorHexSpeaking,
     }),
     Highlight: folder({
       highlightX: { value: DEFAULT_ORB_PROPS.highlightX, min: 0, max: 1, step: 0.01 },
@@ -86,13 +167,17 @@ export function Playground() {
       audioHighlightGain: { value: DEFAULT_ORB_PROPS.audioHighlightGain, min: 0, max: 1, step: 0.01 },
       audioRotGain: { value: DEFAULT_ORB_PROPS.audioRotGain, min: 0, max: 2, step: 0.05 },
     }),
-  });
+  }));
+
+  setLevaRef.current = setLeva as (values: Record<string, unknown>) => void;
 
   const colors: OrbColors = [c0, c1, c2, c3];
+  const colorsSpeaking: OrbColors = [c0s, c1s, c2s, c3s];
 
   latestSettingsRef.current = {
     size,
     colors: [c0, c1, c2, c3],
+    colorsSpeaking: [c0s, c1s, c2s, c3s],
     highlightX,
     highlightY,
     highlightRadius,
@@ -101,6 +186,7 @@ export function Playground() {
     highlightCloudWarp,
     highlightCloudNoise,
     highlightColorHex,
+    highlightColorHexSpeaking,
     highlightColorAlpha,
     blur,
     grainIntensity,
@@ -131,6 +217,7 @@ export function Playground() {
       <Orb
         size={size}
         colors={colors}
+        colorsSpeaking={colorsSpeaking}
         highlightX={highlightX}
         highlightY={highlightY}
         highlightRadius={highlightRadius}
@@ -147,12 +234,13 @@ export function Playground() {
         highlightCloudWarp={highlightCloudWarp}
         highlightCloudNoise={highlightCloudNoise}
         highlightColorHex={highlightColorHex}
+        highlightColorHexSpeaking={highlightColorHexSpeaking}
         highlightColorAlpha={highlightColorAlpha}
         level={level}
         breathPhase={phase}
         elapsedMs={elapsedMs}
       />
-      {justCopied ? (
+      {toast ? (
         <div
           style={{
             position: "fixed",
@@ -162,13 +250,13 @@ export function Playground() {
             padding: "6px 12px",
             borderRadius: 6,
             background: "rgba(0,0,0,0.75)",
-            color: "#6ef56e",
+            color: toast.color,
             fontSize: 12,
             fontFamily: "system-ui, sans-serif",
             zIndex: 20,
           }}
         >
-          Copied to clipboard ✓
+          {toast.text}
         </div>
       ) : null}
       <a

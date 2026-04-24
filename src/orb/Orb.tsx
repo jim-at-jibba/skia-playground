@@ -11,7 +11,7 @@ import {
   Turbulence,
   vec,
 } from "@shopify/react-native-skia";
-import type { OrbProps } from "./types";
+import type { OrbColors, OrbProps } from "./types";
 
 // RN Skia 1.12 ships an incomplete Canvas type (ViewProps resolves to {} because
 // @types/react-native isn't installed). Re-type locally to accept children/style.
@@ -37,10 +37,28 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
   return { r, g, b };
 }
 
+function rgbToHex(r: number, g: number, b: number): string {
+  const h = (n: number) =>
+    Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+  return `#${h(r)}${h(g)}${h(b)}`;
+}
+
+// Linearly interpolate two hex colors in RGB space at t in [0, 1].
+function lerpHex(a: string, b: string, t: number): string {
+  const ca = hexToRgb(a);
+  const cb = hexToRgb(b);
+  return rgbToHex(
+    ca.r + (cb.r - ca.r) * t,
+    ca.g + (cb.g - ca.g) * t,
+    ca.b + (cb.b - ca.b) * t,
+  );
+}
+
 export function Orb(props: OrbProps) {
   const {
     size,
     colors,
+    colorsSpeaking,
     rotation,
     highlightX,
     highlightY,
@@ -57,6 +75,7 @@ export function Orb(props: OrbProps) {
     highlightCloudWarp,
     highlightCloudNoise,
     highlightColorHex,
+    highlightColorHexSpeaking,
     highlightColorAlpha,
     level = 0,
     breathPhase = 0,
@@ -65,7 +84,20 @@ export function Orb(props: OrbProps) {
 
   const canvasSize = Math.ceil(size * CANVAS_SCALE);
   const center = vec(canvasSize / 2, canvasSize / 2);
-  const wrappedColors = [...colors, colors[0]];
+
+  // Blend rest → speaking palette by audio level.
+  const blendedColors: OrbColors = [
+    lerpHex(colors[0], colorsSpeaking[0], level),
+    lerpHex(colors[1], colorsSpeaking[1], level),
+    lerpHex(colors[2], colorsSpeaking[2], level),
+    lerpHex(colors[3], colorsSpeaking[3], level),
+  ];
+  const wrappedColors = [...blendedColors, blendedColors[0]];
+  const blendedHighlightHex = lerpHex(
+    highlightColorHex,
+    highlightColorHexSpeaking,
+    level,
+  );
 
   const scaleMod =
     1 + breathAmount * Math.sin(breathPhase) + audioScaleGain * level;
@@ -95,7 +127,7 @@ export function Orb(props: OrbProps) {
 
   const turbFreq = grainScale / size;
 
-  const { r: hr, g: hg, b: hb } = hexToRgb(highlightColorHex);
+  const { r: hr, g: hg, b: hb } = hexToRgb(blendedHighlightHex);
   const highlightRgba = `rgba(${hr}, ${hg}, ${hb}, ${highlightColorAlpha})`;
   const highlightRgbaEnd = `rgba(${hr}, ${hg}, ${hb}, 0)`;
 
